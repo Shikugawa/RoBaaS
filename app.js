@@ -1,20 +1,17 @@
 const express = require('express');
-const swaggerDoc = require('swagger-jsdoc');
 const container = require('./config/routing/container');
-
-const swaggerOptions = {
-  swaggerDefinition: {
-    info: {
-      title: 'RoBaaS'
-    }
-  },
-  apis: ['./index.js']
-};
+const swaggerInit = require('./config/swagger');
 
 const app = express();
-const swaggerSpec = swaggerDoc(swaggerOptions);
 
+swaggerInit({app});
 app.use('/container', container);
+
+app._router.stack.forEach(function(r){
+  if (r.route && r.route.path){
+    console.log(r.route.path)
+  }
+})
 
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");

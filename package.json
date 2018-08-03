@@ -13,6 +13,7 @@
   },
   "devDependencies": {
     "nodemon": "^1.18.3",
-    "parcel-bundler": "^1.9.7"
+    "parcel-bundler": "^1.9.7",
+    "swagger-express": "^1.0.5"
   }
 }
