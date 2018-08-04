@@ -1,4 +1,4 @@
-const dockerPromise = require('../middleware/docker-promise');
+const dockerPromise = require('../helpers/docker-promise');
 const express = require('express');
 const router = express.Router();
 

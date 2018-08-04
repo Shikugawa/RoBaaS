@@ -3,17 +3,16 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
+    "clear": "rm -rf ./public",
     "build": "parcel build app.js --no-cache -d public --target=node",
-    "start-dev": "nodemon --watch config --exec \"npm run build && node public/app.js\""
+    "start-dev": "npm run clear && nodemon --watch config --exec \"npm run build && node public/app.js\""
   },
   "dependencies": {
     "express": "~4.16.0",
-    "dockerode": "^2.5.5",
-    "swagger-jsdoc": "^3.0.2"
+    "dockerode": "^2.5.5"
   },
   "devDependencies": {
     "nodemon": "^1.18.3",
-    "parcel-bundler": "^1.9.7",
-    "swagger-express": "^1.0.5"
+    "parcel-bundler": "^1.9.7"
   }
 }
