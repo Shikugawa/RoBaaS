@@ -1,5 +1,6 @@
 const Docker = require('dockerode');
 const fs = require('fs');
+const path = require('path');
 
 const docker = new Docker({
   socketPath: '/var/run/docker.sock'
@@ -23,11 +24,22 @@ const getRunningContainers = () => {
   });
 };
 
-const createContainer = (name, cmd) => {
-  const fileStream = fs.createWriteStream(`../log/${name}.log`);
-  docker.run(name, cmd, fileStream).then(container => {
-    return Promise.resolve(container);
-  }).catch(err => { return Promise.reject(err) });
+const createContainer = async name => {
+  const logFileName = name.match(/(.+):robaas/)
+  if(logFileName === null) return Promise.reject("This image can't adapted to RoBaaS");
+  
+  const filePath = path.join(__dirname, `../log/${logFileName[1]}.log`);
+  if(!fs.existsSync(filePath)){
+    const logPath = logFileName[1].split('/');
+    fs.mkdir(path.join(__dirname, `../log/${logPath[0]}`), 
+             err => { return Promise.reject(err) });
+    fs.writeFile(filePath, "", err => { return Promise.reject(err) });
+  }
+
+  const fileStream = fs.createWriteStream(filePath, { flags: 'a' });
+  const container = await docker.run(name, [], fileStream)
+                    .catch(err => { return Promise.reject(err) });
+  return container
 };
 
 module.exports = {

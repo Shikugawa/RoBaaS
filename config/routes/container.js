@@ -17,12 +17,12 @@ router.post('/create/:name', (req, res) => {
   };
 
   dockerPull(containerName).then(stream => {
-    const createdContainer = await dockerPromise.run(containerName, [])
+    const createdContainer = await dockerPromise.run(containerName)
                              .catch(error => handle.error(req, res, error));
     const response = {
       status: true,
       code: req.statusCode,
-      info: JSON.stringify(stream)
+      info: JSON.stringify(createdContainer)
     }
 
     res.json(JSON.stringify(stream));
