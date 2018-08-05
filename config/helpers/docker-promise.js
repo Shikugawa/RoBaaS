@@ -1,4 +1,5 @@
 const Docker = require('dockerode');
+const fs = require('fs');
 
 const docker = new Docker({
   socketPath: '/var/run/docker.sock'
@@ -13,6 +14,24 @@ const dockerPullPromise = name => {
   });
 };
 
+const getRunningContainers = () => {
+  docker.listContainers((err, containers) => {
+    return new Promise((resolve, reject) => {
+      if(err) reject(err);
+      resolve(containers);
+    });
+  });
+};
+
+const createContainer = (name, cmd) => {
+  const fileStream = fs.createWriteStream(`../log/${name}.log`);
+  docker.run(name, cmd, fileStream).then(container => {
+    return Promise.resolve(container);
+  }).catch(err => { return Promise.reject(err) });
+};
+
 module.exports = {
-  pull: dockerPullPromise
+  pull: dockerPullPromise,
+  run: createContainer,
+  ps: getRunningContainers
 }
