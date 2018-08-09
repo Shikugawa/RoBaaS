@@ -1,0 +1,17 @@
+<joblist>
+  <job>
+    <defaultTab>summary</defaultTab>
+    <description>container exec test</description>
+    <executionEnabled>true</executionEnabled>
+    <loglevel>INFO</loglevel>
+    <name>container exec test </name>
+    <nodeFilterEditable>false</nodeFilterEditable>
+    <scheduleEnabled>true</scheduleEnabled>
+    <sequence keepgoing='false' strategy='node-first'>
+      <command>
+        <exec>docker run -t ayamaruyama/rundeck_test:robaas</exec>
+      </command>
+    </sequence>
+  </job>
+</joblist>
+

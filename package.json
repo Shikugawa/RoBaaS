@@ -5,11 +5,13 @@
   "scripts": {
     "clear": "rm -rf ./public",
     "build": "parcel build app.js --no-cache -d public --target=node",
-    "start-dev": "npm run clear && nodemon --watch config --exec \"npm run build && node public/app.js\""
+    "watch": "nodemon --watch config --exec \"npm run build && node public/app.js\"",
+    "start-dev": "npm run clear && npm run watch"
   },
   "dependencies": {
+    "dockerode": "^2.5.5",
     "express": "~4.16.0",
-    "dockerode": "^2.5.5"
+    "node-fetch": "^2.2.0"
   },
   "devDependencies": {
     "nodemon": "^1.18.3",
