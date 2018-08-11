@@ -5,13 +5,15 @@
   "scripts": {
     "clear": "rm -rf ./public",
     "build": "parcel build app.js --no-cache -d public --target=node",
-    "watch": "nodemon --watch config --exec \"npm run build && node public/app.js\"",
+    "start-server": "npm run build && node -r dotenv/config public/app.js dotenv_config_path=./.env",
+    "watch": "nodemon --watch config --exec npm run start-server",
     "start-dev": "npm run clear && npm run watch"
   },
   "dependencies": {
     "dockerode": "^2.5.5",
     "express": "~4.16.0",
-    "node-fetch": "^2.2.0"
+    "node-fetch": "^2.2.0",
+    "node-redis": "^0.1.7"
   },
   "devDependencies": {
     "nodemon": "^1.18.3",
