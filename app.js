@@ -1,5 +1,5 @@
 const express = require('express');
-const container = require('./config/routes/container');
+const container = require('./src/routes/container');
 
 const app = express();
 

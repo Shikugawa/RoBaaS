@@ -3,7 +3,6 @@ const redisClient = require('./redis');
 
 const BASE_URL = 'http://localhost:4440';
 
-
 /**
  * NOTE: Authenticate with master token
  * 
