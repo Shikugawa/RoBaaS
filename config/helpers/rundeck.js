@@ -5,22 +5,32 @@ const BASE_URL = 'http://localhost:4440';
 
 
 /**
- * TODO: Authenticate with master token
+ * NOTE: Authenticate with master token
  * 
- * @returns token
+ * @returns string
  */
 const generateRundeckToken = () => {
-  // const response = await fetch(
-  //   BASE_URL + '/api/25/token/admin', {
-  //     headers: {
-  //       "X-Rundeck-Auth-Token": process.env.MASTER_RUNDECK_TOKEN,
-  //       "accept": "application/json"
-  //     }
-  //   }
-  // );
+  const date = new Date();
 
-  // const tokenInfo = response.json();
-  // return tokenInfo
+  const response = await fetch(
+    BASE_URL + '/api/25/token', {
+      headers: {
+        "X-Rundeck-Auth-Token": process.env.MASTER_RUNDECK_TOKEN,
+        "accept": "application/json",
+        "Content-type": "application/json"
+      },
+      body: {
+        "user": date.getTime(),
+        "role": [
+          "ROLE_user"
+        ],
+        "duration": "10080m"
+      }
+    }
+  ).json();
+
+  const tokenInfo = response.token;
+  return tokenInfo;
 };
 
 const checkIsTokenExpired = async token => {
@@ -64,6 +74,5 @@ const addJobToRundeck = async (...options) => {
 }
 
 module.exports = {
-  addJobToRundeck,
-  generateRundeckToken
+  addJobToRundeck
 }
