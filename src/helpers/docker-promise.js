@@ -6,25 +6,12 @@ const docker = new Docker({
   socketPath: '/var/run/docker.sock'
 });
 
-const dockerPullPromise = name => {
-  docker.pull(name, (stream, error) => {
-    return new Promise((resolve, reject) => {
-      if(error) reject(error);
-      resolve(stream);
-    });
-  });
-};
-
-const getRunningContainers = () => {
-  docker.listContainers((err, containers) => {
-    return new Promise((resolve, reject) => {
-      if(err) reject(err);
-      resolve(containers);
-    });
-  });
-};
-
-const createContainer = async name => {
+/**
+ *
+ *
+ * @returns {Promise<string> | fs.WriteStream}
+ */
+const getFileStream = () => {
   const logFileName = name.match(/(.+):robaas/)
   if(logFileName === null) return Promise.reject("This image can't adapted to RoBaaS");
   
@@ -32,18 +19,75 @@ const createContainer = async name => {
   if(!fs.existsSync(filePath)){
     const logPath = logFileName[1].split('/');
     fs.mkdir(path.join(__dirname, `../log/${logPath[0]}`), 
-             err => { return Promise.reject(err) });
+            err => { return Promise.reject(err) });
     fs.writeFile(filePath, "", err => { return Promise.reject(err) });
-  }
+  };
 
-  const fileStream = fs.createWriteStream(filePath, { flags: 'a' });
-  const container = await docker.run(name, [], fileStream)
-                    .catch(err => { return Promise.reject(err) });
-  return container
+  return fs.createWriteStream(filePath, { flags: 'a' });
 };
 
-module.exports = {
-  pull: dockerPullPromise,
-  run: createContainer,
-  ps: getRunningContainers
+export class Container {
+  /**
+   *
+   *
+   * @static
+   * @param {string} name 
+   * @returns {Promise<Container>}
+   * @memberof Container
+   */
+  static async create(name) {
+    const fileStream = getFileStream();
+    if (fileStream instanceof fs.WriteStream) {
+      const container = await docker.run(name, [], fileStream)
+                      .catch(err => (Promise.reject(err)));
+    
+      return new Container(container);
+    } 
+  }
+
+  /**
+   *
+   *
+   * @static
+   * @param {string} name
+   * @return {Promise<string>}
+   * @memberof Container
+   */
+  static async pull(name) {
+    const stream = await docker.pull(name)
+                   .catch(err => (Promise.reject(err)));
+    return stream;
+  }
+
+  /**
+   *
+   *
+   * @static
+   * @returns {Promise<Object>}
+   * @memberof Container
+   */
+  static async running () {
+    const containers = await docker.listContainers()
+                       .catch(err => (Promise.reject(err)));
+    return containers;
+  }
+
+  /**
+   *Creates an instance of Container.
+   * @param {Promise<Object>} container
+   * @memberof Container
+   */
+  constructor(container) {
+    this.container = docker.getContainer(container.id)
+  }
+
+  /**
+   *
+   *
+   * @returns {Promise<Object>}
+   * @memberof Container
+   */
+  remove () {
+    return this.container.remove()
+  }
 }

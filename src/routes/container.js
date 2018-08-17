@@ -28,7 +28,7 @@ router.post('/create/:name', async (req, res) => {
   res.json(response);
 });
 
-router.get('/list', (req, res) => {
+router.get('/list', async (req, res) => {
   const getContainers = async () => {
     const dockerContainers = await dockerPromise.ps()
                              .catch(error => (Promise.reject(error)));
@@ -46,6 +46,10 @@ router.get('/list', (req, res) => {
   }).catch(message => {
     handle.error(req, res, message);
   });                      
+});
+
+router.post('/destroy/:id', async (req, res) => {
+  
 });
 
 module.exports = router;
