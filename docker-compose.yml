@@ -1,0 +1,17 @@
+version: '2'
+
+services:
+  rundeck:
+    image: ayamaruyama/rundeck-robaas:0.0.3
+    ports: 
+      - 4440:80
+    environment:
+      - SERVER_URL=http://localhost:4440
+
+  robaas:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 3000:80
+      
