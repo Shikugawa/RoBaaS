@@ -1,4 +1,4 @@
-const fetch = require('node-fetch');
+const fetch = require('../../../Library/Caches/typescript/2.9/node_modules/@types/node-fetch');
 const redisClient = require('./redis');
 
 const BASE_URL = 'http://localhost:4440';
