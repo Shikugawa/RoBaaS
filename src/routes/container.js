@@ -11,7 +11,6 @@ const docker = new Docker({
 
 router.post('/create/:name', async (req, res) => {
   const containerName = req.params.name;
-  const msg = Object.assign({}, responseMessage.succeess);
 
   const dockerPull = async name => {
     if(name.match(/(.+):robaas/) === null) {
@@ -35,13 +34,34 @@ router.post('/create/:name', async (req, res) => {
     } 
   }
 
+  const after = (status, res, stream, container) => {
+    switch (status) {
+      case 'success':
+        const msg = Object.assign({}, responseMessage.succeess);
+        handle.createAPIResponse(res, msg, 200, stream, container);
+        break;
+      case 'failed':
+        const msg = Object.assign({}, responseMessage.failed);
+        handle.createAPIResponse(res, msg, 500, stream, container);
+        break;
+      default:
+        break;
+    }
+  }
+
   dockerPull(containerName)
   .then(stream => {
     dockerRun(containerName)
     .then(container => {
-      handle.createAPIResponse(res, msg, 200, stream, container);
-    }).catch(error => handle.createAPIResponse(res, msg, 500, stream, error))
-  }).catch(error => handle.createAPIResponse(res, msg, 500, error));
+      after('success', res, stream, container);
+    })
+    .catch(error => {
+      after('failed', res, stream, error);
+    })
+  })
+  .catch(error => {
+    after('failed', res, error);
+  });
 });
 
 router.get('/list', async (req, res) => {
@@ -54,11 +74,23 @@ router.get('/list', async (req, res) => {
   getContainers()
   .then(containers => {
     handle.listAPIResponse(res, 200, containers)
-  }).catch(error => handle.listAPIResponse(res, 400, error));
+  })
+  .catch(error => handle.listAPIResponse(res, 400, error));
 });
 
 router.post('/destroy/:id', async (req, res) => {
-
+  const containerId = req.params.id;
+  const container = docker.getContainer(containerId);
+  
+  container.remove
+  .then(data => {
+    const msg = Object.assign({}, responseMessage.succeess);
+    handle.removeAPIResponse(res, msg, 200, data);
+  })
+  .catch(error => {
+    const msg = Object.assign({}, responseMessage.failed);
+    handle.removeAPIResponse(res, msg, 500, error);
+  })
 });
 
 module.exports = router;
