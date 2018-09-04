@@ -1,4 +1,7 @@
-export const getFileStream = () => {
+const path = require('path');
+const fs = require('fs');
+
+export const getFileStream = (name: string) => {
   const logFileName = name.match(/(.+):robaas/)
   if(logFileName === null) return Promise.reject("This image can't adapted to RoBaaS");
   

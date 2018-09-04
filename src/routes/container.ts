@@ -1,8 +1,9 @@
 const { getFileStream } = require('../helpers/file')
-const { responseMessage } = require('../helpers/response')
+const { responseMessage } = require('../helpers/response');
+const fs = require('fs');
 const handle = require('../helpers/handle');
 const express = require('express');
-const Docker = require('dockerode');
+const Docker = require('dockerode')
 
 const router = express.Router();
 const docker = new Docker({
@@ -26,23 +27,22 @@ router.post('/create/:name', async (req, res) => {
     const fileStream = getFileStream();
 
     if (fileStream instanceof fs.WriteStream) {
-      const container = await docker.run(name, [], fileStream)
-                      .catch(err => (Promise.reject(err)));
-      return new Container(container);
+      docker.run(name, [], fileStream)
+            .catch(err => (Promise.reject(err)));
     }else{
       return Promise.reject("Can't get output stream");
     } 
   }
 
-  const after = (status, res, stream, container) => {
+  const after = (status, res, ...options) => {
     switch (status) {
       case 'success':
         const msg = Object.assign({}, responseMessage.succeess);
-        handle.createAPIResponse(res, msg, 200, stream, container);
+        handle.createAPIResponse(res, msg, 200, options[0], options[1]);
         break;
       case 'failed':
-        const msg = Object.assign({}, responseMessage.failed);
-        handle.createAPIResponse(res, msg, 500, stream, container);
+        const _msg = Object.assign({}, responseMessage.failed);
+        handle.createAPIResponse(res, _msg, 500, options[0]);
         break;
       default:
         break;

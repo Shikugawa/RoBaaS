@@ -1,5 +1,5 @@
-const fetch = require('../../../Library/Caches/typescript/2.9/node_modules/@types/node-fetch');
 const redisClient = require('./redis');
+const _fetch = require('node-fetch');
 
 const BASE_URL = 'http://localhost:4440';
 
@@ -8,10 +8,10 @@ const BASE_URL = 'http://localhost:4440';
  * 
  * @returns string
  */
-const generateRundeckToken = () => {
+const generateRundeckToken = async () => {
   const date = new Date();
 
-  const response = await fetch(
+  const response = await _fetch(
     BASE_URL + '/api/25/token', {
       headers: {
         "X-Rundeck-Auth-Token": process.env.MASTER_RUNDECK_TOKEN,
@@ -33,7 +33,7 @@ const generateRundeckToken = () => {
 };
 
 const checkIsTokenExpired = async token => {
-  const response = await fetch(
+  const response = await _fetch(
     BASE_URL + '/api/25/tokens',{
       headers: {
         "X-Rundeck-Auth-Token": token,
@@ -46,9 +46,9 @@ const checkIsTokenExpired = async token => {
   return tokenInfo[0].expired;
 };
 
-const addJobToRundeck = async (...options) => {
+const addJobToRundeck = async options => {
   const redis = new redisClient();
-  const rundeckAuthToken = redis.getToken();
+  let rundeckAuthToken = redis.getToken();
 
   if(checkIsTokenExpired(rundeckAuthToken) || rundeckAuthToken === undefined){
     rundeckAuthToken = generateRundeckToken();
@@ -57,7 +57,7 @@ const addJobToRundeck = async (...options) => {
   const form = new FormData();
   form.append('importFile', options.fileName);
 
-  const response = await fetch(
+  const response = await _fetch(
     BASE_URL + '/api/25/project/test/jobs/import',
     {
       method: 'POST',
