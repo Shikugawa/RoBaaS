@@ -3,6 +3,7 @@ import express = require('express');
 import Docker = require('dockerode');
 import util = require('util');
 
+const { authWithToken } = require('../helpers/auth');
 const { getFileStream } = require('../helpers/file')
 const { responseMessage } = require('../helpers/response');
 const handle = require('../helpers/handle') ;
@@ -11,7 +12,7 @@ const router = express.Router();
 const docker = new Docker({
   socketPath: '/var/run/docker.sock'
 });
-
+ 
 let auth = {
   username: process.env['HUB_USERNAME'],
   password: process.env['HUB_PASSWORD'],
@@ -20,7 +21,23 @@ let auth = {
   serveraddress: 'https://index.docker.io/v1'
 };
 
+const after = (status, res, ...options) => {
+  switch (status) {
+    case 'success':
+      const msg = Object.assign({}, responseMessage.succeess);
+      handle.createAPIResponse(res, msg, 200, options[0], options[1]);
+      break;
+    case 'failed':
+      const _msg = Object.assign({}, responseMessage.failed);
+      handle.createAPIResponse(res, _msg, 500, options[0]);
+      break;
+    default:
+      break;
+  }
+}
+
 router.post('/create/:name', async (req, res) => {
+  const token = req.headers.authorization;
   const containerName: string = req.params.name;
 
   const dockerPull: (name: string) => Promise<Object> = async name => {
@@ -33,7 +50,7 @@ router.post('/create/:name', async (req, res) => {
     }
 
     const stream = await docker.pull(name, {}, auth)
-                   .catch(err => (Promise.reject(err)));
+                   .catch(err => Promise.reject(err));
     return stream
   };
 
@@ -42,28 +59,15 @@ router.post('/create/:name', async (req, res) => {
 
     if (fileStream instanceof fs.WriteStream) {
       const result = await docker.run(name, [], fileStream)
-                     .catch(err => (Promise.reject(err)));
+                     .catch(err => Promise.reject(err));
       return result;               
-    }else{
+    } else {
       return Promise.reject("Can't get output stream");
     } 
   }
-
-  const after = (status, res, ...options) => {
-    switch (status) {
-      case 'success':
-        const msg = Object.assign({}, responseMessage.succeess);
-        handle.createAPIResponse(res, msg, 200, options[0], options[1]);
-        break;
-      case 'failed':
-        const _msg = Object.assign({}, responseMessage.failed);
-        handle.createAPIResponse(res, _msg, 500, options[0]);
-        break;
-      default:
-        break;
-    }
-  }
-
+  
+  authWithToken(token, res, after);
+        
   dockerPull(containerName)
   .then(stream => {
     dockerRun(containerName)
@@ -80,12 +84,16 @@ router.post('/create/:name', async (req, res) => {
 });
 
 router.get('/list', async (req, res) => {
+  const token = req.headers.authorization;
+
   const getContainers: () => Promise<Array<Object>> = async () => {
     const containers = await docker.listContainers()
-                       .catch(err => (Promise.reject(err)));
+                       .catch(err => Promise.reject(err));
     return containers;
   };
   
+  authWithToken(token, res, after);
+
   getContainers()
   .then(containers => {
     handle.listAPIResponse(res, 200, containers)
@@ -94,10 +102,14 @@ router.get('/list', async (req, res) => {
 });
 
 router.post('/destroy/:id', async (req, res) => {
+  const token = req.headers.authorization;
+  
   const containerId = req.params.id;
   const container = docker.getContainer(containerId);
   const containerRemoveAsync = util.promisify(container.remove);
   
+  authWithToken(token, res, after);
+
   containerRemoveAsync()
   .then(data => {
     const msg = Object.assign({}, responseMessage.succeess);

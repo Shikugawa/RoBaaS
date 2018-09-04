@@ -67,3 +67,6 @@ typings/
 
 # bundled files
 public/
+
+# Firebase Admin SDK secret key
+robaas-4e282-firebase-adminsdk-vgse3-3c18e8fbf8.json

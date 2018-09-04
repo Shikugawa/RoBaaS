@@ -1,7 +1,6 @@
 import redis = require('node-redis');
 // const BASE_URL = 'http://localhost:6379';
 
-
 class RedisClient {
   private client: redis.RedisClient;
   private token: string;
