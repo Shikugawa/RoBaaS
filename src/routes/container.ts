@@ -11,9 +11,9 @@ const docker = new Docker({
 });
 
 router.post('/create/:name', async (req, res) => {
-  const containerName = req.params.name;
+  const containerName: string = req.params.name;
 
-  const dockerPull = async name => {
+  const dockerPull: (name: string) => Promise<Object> = async name => {
     if(name.match(/(.+):robaas/) === null) {
        return Promise.reject("This image is not adapted to RoBaaS"); 
     }
@@ -23,12 +23,13 @@ router.post('/create/:name', async (req, res) => {
     return stream;
   };
 
-  const dockerRun = async name => {
+  const dockerRun: (name: string) => Promise<string | Object> = async name => {
     const fileStream = getFileStream();
 
     if (fileStream instanceof fs.WriteStream) {
-      docker.run(name, [], fileStream)
-            .catch(err => (Promise.reject(err)));
+      const result = await docker.run(name, [], fileStream)
+                     .catch(err => (Promise.reject(err)));
+      return result;               
     }else{
       return Promise.reject("Can't get output stream");
     } 
@@ -65,7 +66,7 @@ router.post('/create/:name', async (req, res) => {
 });
 
 router.get('/list', async (req, res) => {
-  const getContainers = async () => {
+  const getContainers: () => Promise<Array<Object>> = async () => {
     const containers = await docker.listContainers()
                        .catch(err => (Promise.reject(err)));
     return containers;

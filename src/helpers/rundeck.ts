@@ -3,12 +3,7 @@ const _fetch = require('node-fetch');
 
 const BASE_URL = 'http://localhost:4440';
 
-/**
- * NOTE: Authenticate with master token
- * 
- * @returns string
- */
-const generateRundeckToken = async () => {
+const generateRundeckToken: () => Promise<string> = async () => {
   const date = new Date();
 
   const response = await _fetch(
@@ -32,7 +27,7 @@ const generateRundeckToken = async () => {
   return tokenInfo;
 };
 
-const checkIsTokenExpired = async token => {
+const checkIsTokenExpired: (name: string) => Promise<boolean> = async (token: string) => {
   const response = await _fetch(
     BASE_URL + '/api/25/tokens',{
       headers: {
@@ -46,12 +41,12 @@ const checkIsTokenExpired = async token => {
   return tokenInfo[0].expired;
 };
 
-const addJobToRundeck = async options => {
+const addJobToRundeck: (options: { fileName: string }) => Promise<Object> = async (options: { fileName: string }) => {
   const redis = new redisClient();
-  let rundeckAuthToken = redis.getToken();
+  let rundeckAuthToken: string = redis.getToken();
 
-  if(checkIsTokenExpired(rundeckAuthToken) || rundeckAuthToken === undefined){
-    rundeckAuthToken = generateRundeckToken();
+  if(await checkIsTokenExpired(rundeckAuthToken) || rundeckAuthToken === undefined){
+    rundeckAuthToken = await generateRundeckToken();
   }
 
   const form = new FormData();

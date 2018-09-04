@@ -1,13 +1,9 @@
-const redis = require('node-redis');
+import redis = require('node-redis');
 // const BASE_URL = 'http://localhost:6379';
 
-interface RedisClientInterface {
-  get: (string) => string;
-  set: (string, token) => void;
-}
 
 class RedisClient {
-  private client: RedisClientInterface;
+  private client: redis.RedisClient;
   private token: string;
 
   constructor() {
@@ -15,12 +11,12 @@ class RedisClient {
     this.token = process.env["RUNDECK_MASTER_TOKEN"]
   }
 
-  getToken() {
+  getToken(): string {
     const currentToken = this.client.get(this.token);
     return currentToken;
   }
 
-  updateToken(token) {
+  updateToken(token: string): void {
     this.client.set(this.token, token);
   }
 }
