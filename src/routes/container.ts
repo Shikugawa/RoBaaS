@@ -1,14 +1,24 @@
+import fs = require('fs');
+import express = require('express');
+import Docker = require('dockerode');
+import util = require('util');
+
 const { getFileStream } = require('../helpers/file')
 const { responseMessage } = require('../helpers/response');
-const fs = require('fs');
-const handle = require('../helpers/handle');
-const express = require('express');
-const Docker = require('dockerode')
+const handle = require('../helpers/handle') ;
 
 const router = express.Router();
 const docker = new Docker({
   socketPath: '/var/run/docker.sock'
 });
+
+let auth = {
+  username: process.env['HUB_USERNAME'],
+  password: process.env['HUB_PASSWORD'],
+  auth: '',
+  email: process.env['HUB_EMAIL'],
+  serveraddress: 'https://index.docker.io/v1'
+};
 
 router.post('/create/:name', async (req, res) => {
   const containerName: string = req.params.name;
@@ -18,9 +28,13 @@ router.post('/create/:name', async (req, res) => {
        return Promise.reject("This image is not adapted to RoBaaS"); 
     }
     
-    const stream = await docker.pull(name)
+    if(auth.username === undefined || auth.password === undefined || auth.email === undefined){
+      auth = null
+    }
+
+    const stream = await docker.pull(name, {}, auth)
                    .catch(err => (Promise.reject(err)));
-    return stream;
+    return stream
   };
 
   const dockerRun: (name: string) => Promise<string | Object> = async name => {
@@ -82,8 +96,9 @@ router.get('/list', async (req, res) => {
 router.post('/destroy/:id', async (req, res) => {
   const containerId = req.params.id;
   const container = docker.getContainer(containerId);
+  const containerRemoveAsync = util.promisify(container.remove);
   
-  container.remove
+  containerRemoveAsync()
   .then(data => {
     const msg = Object.assign({}, responseMessage.succeess);
     handle.removeAPIResponse(res, msg, 200, data);
