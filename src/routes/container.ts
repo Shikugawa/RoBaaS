@@ -40,7 +40,7 @@ router.post('/create/:name', async (req, res) => {
   const token = req.headers.authorization;
   const containerName: string = req.params.name;
 
-  const dockerPull: (name: string) => Promise<Object> = async name => {
+  const dockerPull: (name: string) => Promise<string | Object> = async name => {
     if(name.match(/(.+):robaas/) === null) {
        return Promise.reject("This image is not adapted to RoBaaS"); 
     }

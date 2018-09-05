@@ -1,9 +1,9 @@
 const express = require('express');
 const container = require('./src/routes/container');
-const admin = require("firebase-admin");
-const path = require("path");
+const admin = require('firebase-admin');
+const path = require('path');
 
-const serviceAccount = require(path.join(__dirname, "serviceAccountKey.json"));
+const serviceAccount = require(path.join(process.cwd(), process.env["FIREBASE_TOKEN_INFO"]));
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
