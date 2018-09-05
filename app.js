@@ -1,18 +1,9 @@
 const express = require('express');
 const container = require('./src/routes/container');
-const admin = require('firebase-admin');
-const path = require('path');
-
-const serviceAccount = require(path.join(process.cwd(), process.env["FIREBASE_TOKEN_INFO"]));
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: process.env["FIREBASE_AUTH_DB"]
-});
+const auth = require('./src/routes/auth');
 
 const app = express();
 
+app.use('/auth', auth);
 app.use('/container', container);
 app.listen(3000);
-
-export default admin;
