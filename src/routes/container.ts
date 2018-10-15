@@ -3,7 +3,6 @@ import express = require('express');
 import Docker = require('dockerode');
 import util = require('util');
 
-const { authWithToken } = require('../helpers/auth');
 const { getFileStream } = require('../helpers/file')
 const { responseMessage } = require('../helpers/response');
 const handle = require('../helpers/handle') ;
@@ -65,8 +64,6 @@ router.post('/create/:name', async (req, res) => {
       return Promise.reject("Can't get output stream");
     } 
   }
-  
-  authWithToken(token, res, after);
         
   dockerPull(containerName)
   .then(stream => {
@@ -91,8 +88,6 @@ router.get('/list', async (req, res) => {
                        .catch(err => Promise.reject(err));
     return containers;
   };
-  
-  authWithToken(token, res, after);
 
   getContainers()
   .then(containers => {
@@ -108,8 +103,6 @@ router.post('/destroy/:id', async (req, res) => {
   const container = docker.getContainer(containerId);
   const containerRemoveAsync = util.promisify(container.remove);
   
-  authWithToken(token, res, after);
-
   containerRemoveAsync()
   .then(data => {
     const msg = Object.assign({}, responseMessage.succeess);

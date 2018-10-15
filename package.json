@@ -12,8 +12,6 @@
   "dependencies": {
     "dockerode": "^2.5.5",
     "express": "~4.16.0",
-    "firebase": "^5.4.2",
-    "firebase-admin": "^6.0.0",
     "node-fetch": "^2.2.0",
     "node-redis": "^0.1.7"
   },
