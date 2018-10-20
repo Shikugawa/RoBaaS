@@ -35,9 +35,10 @@ const after = (status, res, ...options) => {
   }
 }
 
-router.post('/create/:name', async (req, res) => {
-  const token = req.headers.authorization;
-  const containerName: string = req.params.name;
+router.post('/create/:username/:imagename', async (req, res) => {
+  const username: string = req.params.username;
+  const containerName: string = req.params.imagename;
+  const passingName: string = `${username}/${containerName}:robaas`;
 
   const dockerPull: (name: string) => Promise<string | Object> = async name => {
     if(name.match(/(.+):robaas/) === null) {
@@ -54,25 +55,27 @@ router.post('/create/:name', async (req, res) => {
   };
 
   const dockerRun: (name: string) => Promise<string | Object> = async name => {
-    const fileStream = getFileStream();
+    let fileStream;
 
-    if (fileStream instanceof fs.WriteStream) {
-      const result = await docker.run(name, [], fileStream)
-                     .catch(err => Promise.reject(err));
-      return result;               
-    } else {
-      return Promise.reject("Can't get output stream");
-    } 
+    try {
+      fileStream = getFileStream(name);  
+    } catch (error) {
+      return Promise.reject(error.message);
+    }
+
+    const result = await docker.run(name, [], fileStream)
+                  .catch(err => Promise.reject(err));
+    return result;               
   }
         
-  dockerPull(containerName)
+  dockerPull(passingName)
   .then(stream => {
-    dockerRun(containerName)
+    dockerRun(passingName)
     .then(container => {
-      after('success', res, stream, container);
+      after('success', res, stream, JSON.stringify(container));
     })
     .catch(error => {
-      after('failed', res, stream, error);
+      after('failed', res, stream, JSON.stringify(error));
     })
   })
   .catch(error => {

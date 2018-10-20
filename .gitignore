@@ -1,6 +1,7 @@
 ### https://raw.github.com/github/gitignore/9139ad597b05354da689b19ce805c389252a6b8b/Node.gitignore
 
 # Logs
+log
 logs
 *.log
 npm-debug.log*
@@ -67,6 +68,3 @@ typings/
 
 # bundled files
 public/
-
-# Firebase Admin SDK secret key
-robaas-4e282-firebase-adminsdk-vgse3-3c18e8fbf8.json
