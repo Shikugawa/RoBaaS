@@ -3,6 +3,10 @@ import express = require('express');
 import Docker = require('dockerode');
 import util = require('util');
 
+interface Image {
+  RepoTags: Array<string>;
+}
+
 const { getFileStream } = require('../helpers/file')
 const { responseMessage } = require('../helpers/response');
 const handle = require('../helpers/handle') ;
@@ -86,15 +90,20 @@ router.post('/create/:username/:imagename', async (req, res) => {
 router.get('/list', async (req, res) => {
   const token = req.headers.authorization;
 
-  const getContainers: () => Promise<Array<Object>> = async () => {
-    const containers = await docker.listContainers()
+  const getDockerImages: () => Promise<Array<Object>> = async () => {
+    const containers = await docker.listImages()
                        .catch(err => Promise.reject(err));
     return containers;
   };
 
-  getContainers()
+  getDockerImages()
   .then(containers => {
-    handle.listAPIResponse(res, 200, containers)
+    const robaasImages = containers.filter((container: Image) => {
+      const containerRepoTags = container.RepoTags;
+      return containerRepoTags.length === 1 && containerRepoTags[0].match(/(.*):robaas/);
+    });
+    
+    handle.listAPIResponse(res, {}, 200, robaasImages);
   })
   .catch(error => handle.listAPIResponse(res, 400, error));
 });

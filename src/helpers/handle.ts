@@ -1,12 +1,12 @@
 module.exports = {
-  createAPIResponse: (res, msg, statusCode, pullMessage, runMessage) => {
+  createAPIResponse: (res, msg, statusCode) => {
     msg.statusCode = statusCode;
     res.json(msg);
   },
   listAPIResponse: (res, msg, statusCode, containerInfo) => {
     msg.statusCode = statusCode;
     msg.info = JSON.stringify(containerInfo);
-
+    
     res.json(msg);
   },
   removeAPIResponse: (res, msg, statusCode, message) => {
