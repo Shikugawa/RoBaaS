@@ -5,7 +5,7 @@ module.exports = {
   },
   listAPIResponse: (res, msg, statusCode, containerInfo) => {
     msg.statusCode = statusCode;
-    msg.info = JSON.stringify(containerInfo);
+    msg.info = containerInfo;
     
     res.json(msg);
   },

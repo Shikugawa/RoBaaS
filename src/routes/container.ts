@@ -1,4 +1,3 @@
-import fs = require('fs');
 import express = require('express');
 import Docker = require('dockerode');
 import util = require('util');
@@ -110,12 +109,10 @@ router.get('/list', async (req, res) => {
 
 router.post('/destroy/:id', async (req, res) => {
   const token = req.headers.authorization;
-  
-  const containerId = req.params.id;
-  const container = docker.getContainer(containerId);
-  const containerRemoveAsync = util.promisify(container.remove);
-  
-  containerRemoveAsync()
+  const imageId = req.params.id;
+  const image = docker.getImage(imageId);
+
+  image.remove()
   .then(data => {
     const msg = Object.assign({}, responseMessage.succeess);
     handle.removeAPIResponse(res, msg, 200, data);
