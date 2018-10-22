@@ -1,6 +1,5 @@
 import express = require('express');
 import Docker = require('dockerode');
-import util = require('util');
 
 interface Image {
   RepoTags: Array<string>;

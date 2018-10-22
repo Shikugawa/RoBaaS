@@ -8,10 +8,17 @@ services:
     environment:
       - SERVER_URL=http://localhost:4440
 
+  cache:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    command: redis-server
+
   robaas:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - 3000:3000
-      
+    links:
+      - cache      
